@@ -1,0 +1,82 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# Environment variables
+.env
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# mypy / Pyre / Pytype type checker
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+
+# Pytest
+.pytest_cache/
+
+# VS Code
+.vscode/
+
+# Pycharm
+.idea/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Local dev DBs or files
+*.sqlite3
+*.db
+*.log
+
+# Uvicorn logs (optional)
+*.pid
+*.log
+
+# FastAPI specific
+instance/
