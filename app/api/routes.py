@@ -1,9 +1,13 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from typing import List
 from app.core.registration import register_user
 from app.core.auth import get_api_key
 from app.core.policy import save_policy, get_policies, delete_policy
 from app.core.limiter import get_policy_for, is_allowed
+from app.core.ip_limiter import limit_by_ip
+from app.core.logging import log_event
+from app.core.logging import get_latest_logs
+from app.models.log_model import LogEntry
 from app.models.request_model import RateLimitCheckRequest, RateLimitCheckResponse
 from app.models.registration_model import UserRegisterRequest, UserRegisterResponse
 from app.models.policy_model import RateLimitPolicy, RateLimitPolicyResponse, DeletePolicyRequest
@@ -14,6 +18,7 @@ router = APIRouter()
 @router.post(
     "/register",
     response_model=UserRegisterResponse,
+    dependencies=[Depends(limit_by_ip(limit=5, window_seconds=60))],
     tags=["User"],
     summary="Register a new application",
     description="Registers a new app owner and returns a unique API key for managing rate limits."
@@ -78,14 +83,48 @@ def check_limit(
     )
 
     if not policy["is_active"]:
-        return RateLimitCheckResponse(
+        response = RateLimitCheckResponse(
             allowed=True,
             reason="Rate limiting disabled for this policy"
         )
 
-    return is_allowed(
+        log_event(api_key, {
+            "user_id": payload.user_id,
+            "route": payload.route_key,
+            "role": payload.role,
+            "allowed": response.allowed,
+            "reason": response.reason
+        })
+
+        return response
+
+    response = is_allowed(
         user_id=payload.user_id,
         route=payload.route_key,
         limit=policy["limit"],
         window=policy["window_seconds"]
     )
+    
+    log_event(api_key, {
+        "user_id": payload.user_id,
+        "route": payload.route_key,
+        "role": payload.role,
+        "allowed": response.allowed,
+        "reason": response.reason
+    })
+    
+    return response
+    
+
+@router.get(
+    "/logs/latest",
+    response_model=List[LogEntry],
+    tags=["Logs"],
+    summary="Fetch latest rate limit logs",
+    description="Returns the most recent rate limit check events for your API key."
+)
+def fetch_logs(
+    limit: int = Query(50, gt=0, le=1000),
+    api_key: str = Depends(get_api_key)
+):
+    return get_latest_logs(api_key, limit=limit)

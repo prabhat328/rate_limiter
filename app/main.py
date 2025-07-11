@@ -7,6 +7,7 @@ from app.redis import redis_client
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Before app starts
+    print("Connecting Redis...")
     redis_client.connect()
     yield
     # On shutdown
