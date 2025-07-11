@@ -1,12 +1,15 @@
 from pydantic import BaseModel
+from typing import Optional
 
-class RateLimitRequest(BaseModel):
+
+class RateLimitCheckRequest(BaseModel):
     user_id: str
     route_key: str
-    limit: int
-    window_seconds: int
+    role: Optional[str] = None
 
-class RateLimitResponse(BaseModel):
+
+class RateLimitCheckResponse(BaseModel):
     allowed: bool
-    remaining: int
-    reset_in: int
+    remaining: Optional[int] = None
+    reset_in: Optional[int] = None
+    reason: Optional[str] = None
